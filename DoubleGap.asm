@@ -48,23 +48,23 @@ main:
 VIDEO_KERNEL:
 
 ; TODO assembler needs to check for sizes when there are multiple options. Like STA xx and STA xxxx.
-; TODO allow for "<" and ">" overrides.
+; TODO allow for "" and ">" overrides.
 ; TODO words
-; TODO auto pick "<" and ">"
+; TODO auto pick "" and ">"
 
     LDA      #2               ; D1 bit ON
-    STA      <WSYNC           ; Wait for the end of the current line
-    STA      <VBLANK          ; Turn the electron beam off
-    STA      <WSYNC           ; Wait for all ...
-    STA      <WSYNC           ; ... the electrons ...
-    STA      <WSYNC           ; ... to drain out.
-    STA      <VSYNC           ; Trigger the vertical sync signal
-    STA      <WSYNC           ; Hold the vsync signal for ...
-    STA      <WSYNC           ; ... three ...
-    STA      <WSYNC           ; ... scanlines
-    STA      <HMOVE           ; Tell hardware to move all game objects
+    STA      WSYNC           ; Wait for the end of the current line
+    STA      VBLANK          ; Turn the electron beam off
+    STA      WSYNC           ; Wait for all ...
+    STA      WSYNC           ; ... the electrons ...
+    STA      WSYNC           ; ... to drain out.
+    STA      VSYNC           ; Trigger the vertical sync signal
+    STA      WSYNC           ; Hold the vsync signal for ...
+    STA      WSYNC           ; ... three ...
+    STA      WSYNC           ; ... scanlines
+    STA      HMOVE           ; Tell hardware to move all game objects
     LDA      #0               ; D1 bit OFF
-    STA      <VSYNC           ; Release the vertical sync signal
+    STA      VSYNC           ; Release the vertical sync signal
     LDA      #43              ; Set timer to 43*64 = 2752 machine ...
     STA      TIM64T           ; ... cycles 2752/(228/3) = 36 scanlines
 
@@ -75,8 +75,8 @@ VIDEO_KERNEL:
     ;  1 = Playing-Game processing
     ;  2 = Selecting-Game processing
 
-    INC      <ENTROPYA         ; Counting video frames as part of the random number
-    LDA      <MODE             ; What are we doing between frames?
+    INC      ENTROPYA         ; Counting video frames as part of the random number
+    LDA      MODE             ; What are we doing between frames?
 
     CMP      #0               ; Mode is ...
     BEQ      DoGameOverMode   ; ... "game over"
@@ -99,55 +99,55 @@ DrawFrame:
     CMP      #0               ; ... the visible area ...
     BNE      DrawFrame        ; ... of the screen
 
-    STA      <WSYNC            ; 37th scanline
+    STA      WSYNC            ; 37th scanline
     LDA      #0               ; Turn the ...
-    STA      <VBLANK           ; ... electron beam back on
+    STA      VBLANK           ; ... electron beam back on
 
     LDA      #0               ; Zero out ...
-    STA      <SCANCNT          ; ... scanline count ...
-    STA      <TMP0             ; ... and all ...
-    STA      <TMP1             ; ... returns ...
-    STA      <TMP2             ; ... expected ...
+    STA      SCANCNT          ; ... scanline count ...
+    STA      TMP0             ; ... and all ...
+    STA      TMP1             ; ... returns ...
+    STA      TMP2             ; ... expected ...
     TAX                       ; ... to come from ...
     TAY                       ; ... BUILDROW
 
-    STA      <CXCLR            ; Clear collision detection
+    STA      CXCLR            ; Clear collision detection
 
 DrawVisibleRows:
 
-    LDA      <TMP0             ; Get A ready (PF0 value)
-    STA      <WSYNC            ; Wait for very start of row
-    STX      <GRP0             ; Player 0 -- in X
-    STY      <GRP1             ; Player 1 -- in Y
-    STA      <PF0              ; PF0      -- in TMP0 (already in A)
-    LDA      <TMP1             ; PF1      -- in TMP1
-    STA      <PF1              ; ...
-    LDA      <TMP2             ; PP2      -- in TMP2
-    STA      <PF2              ; ...
+    LDA      TMP0             ; Get A ready (PF0 value)
+    STA      WSYNC            ; Wait for very start of row
+    STX      GRP0             ; Player 0 -- in X
+    STY      GRP1             ; Player 1 -- in Y
+    STA      PF0              ; PF0      -- in TMP0 (already in A)
+    LDA      TMP1             ; PF1      -- in TMP1
+    STA      PF1              ; ...
+    LDA      TMP2             ; PP2      -- in TMP2
+    STA      PF2              ; ...
 
     JSR      BUILDROW         ; This MUST take through to the next line
 
-    INC      <SCANCNT          ; Next scan line
-    LDA      <SCANCNT          ; Do 109*2 = 218 lines
+    INC      SCANCNT          ; Next scan line
+    LDA      SCANCNT          ; Do 109*2 = 218 lines
     CMP      #109             ; All done?
     BNE      DrawVisibleRows  ; No ... get all the visible rows
 
     ;  END VISIBLE PART OF FRAME
 
     LDA      #0               ; Turn off electron beam
-    STA      <WSYNC            ; Next scanline
-    STA      <PF0              ; Play field 0 off
-    STA      <GRP0             ; Player 0 off
-    STA      <GRP1             ; Player 1 off
-    STA      <PF1              ; Play field 1 off
-    STA      <PF2              ; Play field 2 off
-    STA      <WSYNC            ; Next scanline
+    STA      WSYNC            ; Next scanline
+    STA      PF0              ; Play field 0 off
+    STA      GRP0             ; Player 0 off
+    STA      GRP1             ; Player 1 off
+    STA      PF1              ; Play field 1 off
+    STA      PF2              ; Play field 2 off
+    STA      WSYNC            ; Next scanline
 
     JMP      VIDEO_KERNEL
 
 BUILDROW:
 
-    LDA      <SCANCNT          ; Where are we on the screen?
+    LDA      SCANCNT          ; Where are we on the screen?
 
     CMP      #6               ; If we are in the ...
     BCC      ShowScore        ; ... score area
@@ -157,48 +157,48 @@ BUILDROW:
     LDA      GR_PLAYER,Y      ; Get the graphics (if enabled on this row)
     TAX                       ; Hold it (for return as player 0)
     TAY                       ; Hold it (for return as player 1)
-    LDA      <SCANCNT          ; Scanline count again
+    LDA      SCANCNT          ; Scanline count again
     LSR      A                ; This time ...
     LSR      A                ; ... we divide ...
     LSR      A                ; ... by eight (8 rows in picture)
 
-    CMP      <PLAYR0Y          ; Scanline group of the P0 object?
+    CMP      PLAYR0Y          ; Scanline group of the P0 object?
     BEQ      ShowP0           ; Yes ... keep the picture
     LDX      #0               ; Not time for Player 0 ... no graphics
 ShowP0:
 
-    CMP      <PLAYR1Y          ; Scanline group of the P1 object?
+    CMP      PLAYR1Y          ; Scanline group of the P1 object?
     BEQ      ShowP1           ; Yes ... keep the picture
     LDY      #0               ; Not time for Player 0 ... no graphics
 ShowP1:
 
-    LDA      <WALLSTART        ; Calculate ...
+    LDA      WALLSTART        ; Calculate ...
     CLC                       ; ... the bottom ...
-    ADC      <WALLHEI          ; ... of ...
-    STA      <TMP0             ; ... the wall
+    ADC      WALLHEI          ; ... of ...
+    STA      TMP0             ; ... the wall
 
-    LDA      <SCANCNT          ; Scanline count
+    LDA      SCANCNT          ; Scanline count
 
-    CMP      <WALLSTART        ; Past upper part of wall?
+    CMP      WALLSTART        ; Past upper part of wall?
     BCC      NoWall           ; No ... skip it
-    CMP      <TMP0             ; Past lower part of wall
+    CMP      TMP0             ; Past lower part of wall
     BCS      NoWall           ; Yes ... skip it
 
     ;  The wall is on this row
-    LDA      <WALLDRELA        ; Draw wall ...
-    STA      <TMP0             ; ... by transfering ...
-    LDA      <WALLDRELB        ; ... playfield ...
-    STA      <TMP1             ; ... patterns ...
-    LDA      <WALLDRELC        ; ... to ...
-    STA      <TMP2             ; ... return area
+    LDA      WALLDRELA        ; Draw wall ...
+    STA      TMP0             ; ... by transfering ...
+    LDA      WALLDRELB        ; ... playfield ...
+    STA      TMP1             ; ... patterns ...
+    LDA      WALLDRELC        ; ... to ...
+    STA      TMP2             ; ... return area
     RTS                       ; Done
 
 NoWall:
     ;  The wall is NOT on this row
     LDA      #0               ; No walls on this row
-    STA      <TMP0             ; ... clear ...
-    STA      <TMP1             ; ... out ...
-    STA      <TMP2             ; ... the playfield
+    STA      TMP0             ; ... clear ...
+    STA      TMP1             ; ... out ...
+    STA      TMP2             ; ... the playfield
     RTS                       ; Done
 
 ShowScore:
@@ -211,28 +211,28 @@ ShowScore:
     ;  now.
 
     LDX      #0               ; Blank bit pattern
-    STX      <TMP0             ; This will always be blank
-    STX      <PF1              ; Turn off playfield ...
-    STX      <PF2              ; ... for right half of the screen
+    STX      TMP0             ; This will always be blank
+    STX      PF1              ; Turn off playfield ...
+    STX      PF2              ; ... for right half of the screen
 
     TAX                       ; Another index
     LDA      SCORE_PF1,Y      ; Lookup the PF1 graphics for this row
-    STA      <TMP1             ; Return it to the caller
+    STA      TMP1             ; Return it to the caller
     TAY                       ; We'll need this value again in a second
-    LDA      <SCORE_PF2,X      ; Lookup the PF2 graphics for this row
-    STA      <TMP2             ; Return it to the caller
+    LDA      SCORE_PF2,X      ; Lookup the PF2 graphics for this row
+    STA      TMP2             ; Return it to the caller
 
-    STA      <WSYNC            ; Now on the next row
+    STA      WSYNC            ; Now on the next row
 
-    STY      <PF1              ; Repeat the left-side playfield ...
-    STA      <PF2              ; ... onto the new row
+    STY      PF1              ; Repeat the left-side playfield ...
+    STA      PF2              ; ... onto the new row
 
-    LDA      <SCORE_PF2,X      ; Kill some time waiting for the ...
-    LDA      <SCORE_PF2,X      ; ... beam to pass the left half ...
-    LDA      <SCORE_PF2,X      ; ... of the playfield again
-    LDA      <SCORE_PF2,X      ; ...
-    LDA      <SCORE_PF2,X      ; ...
-    LDA      <SCORE_PF2,X      ; ...
+    LDA      SCORE_PF2,X      ; Kill some time waiting for the ...
+    LDA      SCORE_PF2,X      ; ... beam to pass the left half ...
+    LDA      SCORE_PF2,X      ; ... of the playfield again
+    LDA      SCORE_PF2,X      ; ...
+    LDA      SCORE_PF2,X      ; ...
+    LDA      SCORE_PF2,X      ; ...
 
     LDX      #0               ; Return 0 (off) for player 0 ...
     LDY      #0               ; ... and player 1
@@ -240,8 +240,8 @@ ShowScore:
     ;  The beam is past the left half of the field again.
     ;  Turn off the playfield.
 
-    STX      <PF1              ; 0 to PF1 ...
-    STX      <PF2              ; ... and PF2
+    STX      PF1              ; 0 to PF1 ...
+    STX      PF2              ; ... and PF2
     RTS                       ;  Done
 
 INIT:
@@ -249,54 +249,54 @@ INIT:
     ;  game settings and variables.
                                            
     LDA      #64              ; Wall is ...
-    STA      <COLUPF           ; ... redish
+    STA      COLUPF           ; ... redish
     LDA      #126             ; P0 is ...
-    STA      <COLUP0           ; ... white
+    STA      COLUP0           ; ... white
     LDA      #0               ; P1 ...
-    STA      <COLUP1           ; ... black
+    STA      COLUP1           ; ... black
                                            
     LDA      #5               ; Right half of playfield is reflection of left ...
-    STA      <CTRLPF           ; ... and playfield is on top of players
+    STA      CTRLPF           ; ... and playfield is on top of players
 
     ; TODO other hardware inits here
                                            
     LDX      #4               ; Player 0 position count
     LDY      #3               ; Player 1 position count
-    STA      <WSYNC            ; Get a fresh scanline
+    STA      WSYNC            ; Get a fresh scanline
                                            
 TimeP0Pos:
     DEX                       ; Kill time while the beam moves ...
     CPX      #0               ; ... to desired ...
     BNE      TimeP0Pos        ; ... position
-    STA      <RESP0            ; Mark player 0's X position
+    STA      RESP0            ; Mark player 0's X position
                                            
 TimeP1Pos:
     DEY                       ; Kill time while the beam moves ...
     CPY      #0               ; ... to desired ...
     BNE      TimeP1Pos        ; ... position
-    STA      <RESP1            ; Mark player 1's X position
+    STA      RESP1            ; Mark player 1's X position
 
     JSR      EXPERTISE        ; Initialize the players' Y positions base on expert-settings
                                            
     LDA      #10              ; Wall is ...
-    STA      <WALLHEI          ; ... 10 double-scanlines high
+    STA      WALLHEI          ; ... 10 double-scanlines high
                                            
     LDA      #0               ; Set score to ...
-    STA      <WALLCNT          ; ... 0
+    STA      WALLCNT          ; ... 0
     JSR      MAKE_SCORE       ; Blank the score digits
     LDA      #0               ; Blank bits ...
-    STA      <SCORE_PF2+5      ; ... on the end of each ...
-    STA      <SCORE_PF1+5      ; ... digit pattern
+    STA      SCORE_PF2+5      ; ... on the end of each ...
+    STA      SCORE_PF1+5      ; ... digit pattern
                                            
     JSR      ADJUST_DIF       ; Initialize the wall parameters
     JSR      NEW_GAPS         ; Build the wall's initial gap
                                            
     LDA      #112             ; Set wall position off bottom ...
-    STA      <WALLSTART        ; ... to force a restart on first move
+    STA      WALLSTART        ; ... to force a restart on first move
                                            
     LDA      #0               ; Zero out ...
-    STA      <HMP0             ; ... player 0 motion ...
-    STA      <HMP1             ; ... and player 1 motion
+    STA      HMP0             ; ... player 0 motion ...
+    STA      HMP1             ; ... and player 1 motion
                                            
     RTS                       ; Done
 
@@ -305,13 +305,13 @@ INIT_PLAYMODE:
     ;  This function initializes the game play mode
 
     LDA      #192             ; Background is ...
-    STA      <COLUBK           ; ... greenish
+    STA      COLUBK           ; ... greenish
     LDA      #1               ; Game mode is ...
-    STA      <MODE             ; ... SELECT
+    STA      MODE             ; ... SELECT
     LDA      #255             ; Restart wall score to ...
-    STA      <WALLCNT          ; ... 0 on first move
+    STA      WALLCNT          ; ... 0 on first move
     LDA      #112             ; Force wall to start ...
-    STA      <WALLSTART        ; ... over on first move
+    STA      WALLSTART        ; ... over on first move
     JSR      INIT_MUSIC       ; Initialize the music
     RTS                       ; Done
 
@@ -324,7 +324,7 @@ PLAYMODE:
 
     CMP      #0               ; Is select pressed?
     BEQ      NoSelect         ; No ... skip
-    STX      <DEBOUNCE         ; Restore the old value ...
+    STX      DEBOUNCE         ; Restore the old value ...
     JSR      INIT_SELMODE     ; ... and let select-mode process the toggle
     RTS                       ; Done
 
@@ -334,17 +334,17 @@ NoSelect:
 
     CMP      #1               ; Wall on first row?
     BNE      NoFirst          ; No ... move on
-    INC      <WALLCNT          ; Bump the score
+    INC      WALLCNT          ; Bump the score
     JSR      ADJUST_DIF       ; Change the wall parameters based on score
-    LDA      <WALLCNT          ; Change the ...
+    LDA      WALLCNT          ; Change the ...
     JSR      MAKE_SCORE       ; ... score pattern
     JSR      NEW_GAPS         ; Calculate the new gap position
 
 NoFirst:
-     LDA      <CXP0FB          ; Player 0 collision with playfield
-     STA      <TMP0            ; Hold it
-     LDA      <CXP1FB          ; Player 1 collision with playfield
-     ORA      <TMP0            ; Did either ...
+     LDA      CXP0FB          ; Player 0 collision with playfield
+     STA      TMP0            ; Hold it
+     LDA      CXP1FB          ; Player 1 collision with playfield
+     ORA      TMP0            ; Did either ...
      AND      #128            ; ... player hit ...
      CMP      #0              ; ... wall?
      BEQ      NoHit           ; No ... move on
@@ -368,7 +368,7 @@ MoveP0Right:
 MoveP0Left:
      LDA      #240            ; -1
 SetMoveP0:
-     STA      <HMP0            ; New movement value P0
+     STA      HMP0            ; New movement value P0
 
      LDA      SWCHA           ; Joystick
      AND      #8              ; Player 1 ...
@@ -386,7 +386,7 @@ MoveP1Right:
 MoveP1Left:
      LDA      #240            ; -1
 SetMoveP1:
-     STA      <HMP1            ; New movement value P1
+     STA      HMP1            ; New movement value P1
 
      RTS                      ; Done
 
@@ -395,12 +395,12 @@ INIT_SELMODE:
      ;  This function initializes the games SELECT-MODE
 
      LDA      #0              ; Turn off ...
-     STA      <AUDV0           ; ... all ...
-     STA      <AUDV1           ; ... sound
+     STA      AUDV0           ; ... all ...
+     STA      AUDV1           ; ... sound
      LDA      #200            ; Background ...
-     STA      <COLUBK          ; ... greenish bright
+     STA      COLUBK          ; ... greenish bright
      LDA      #2              ; Now in ...
-     STA      <MODE            ; SELECT game mode
+     STA      MODE            ; SELECT game mode
      RTS                      ; Done
 
 
@@ -418,15 +418,15 @@ SELMODE:
      BEQ      SelStartGame     ; Yes ... start game
      CMP      #2               ; Select only?
      BNE      SelExp           ; No ... stay in this mode
-     LDA      <PLAYR1Y          ; Select toggled. Get player 1 Y coordinate
+     LDA      PLAYR1Y          ; Select toggled. Get player 1 Y coordinate
      CMP      #255             ; 2nd player on the screen?
      BEQ      SelP1On          ; No ... toggle it on
      LDA      #255             ; Yes ...
-     STA      <PLAYR1Y          ; ... toggle it off
+     STA      PLAYR1Y          ; ... toggle it off
      JMP      SelExp           ; Move to expertise
 SelP1On:
      LDA      #12              ; Y coordinate
-     STA      <PLAYR1Y          ; On screen now
+     STA      PLAYR1Y          ; On screen now
      JMP      SelExp           ; Move to expertise
 
 SelStartGame:
@@ -439,20 +439,20 @@ INIT_GOMODE:
 
      ;  This function initializes the GAME-OVER game mode.
 
-     STA      <HMCLR            ; Stop both players from moving
-     LDA      <CXP0FB           ; P0 collision ...
+     STA      HMCLR            ; Stop both players from moving
+     LDA      CXP0FB           ; P0 collision ...
      AND      #128             ; ... with wall
      CMP      #0               ; Did P0 hit the wall?
      BNE      GoCheckP1        ; Yes ... leave it at bottom
      LDA      #2               ; No ... move player 0 ...
-     STA      <PLAYR0Y          ; ... up the screen to show win
+     STA      PLAYR0Y          ; ... up the screen to show win
 
 GoCheckP1:
-     LDA      <CXP1FB           ; P1 collision ...
+     LDA      CXP1FB           ; P1 collision ...
      AND      #128             ; ... with wall
      CMP      #0               ; Did P1 hit the wall?
      BNE      GoP1Hit          ; Yes ... leave it at the bottom
-     LDA      <PLAYR1Y          ; Is P1 even ...
+     LDA      PLAYR1Y          ; Is P1 even ...
      CMP      #255             ; ... on the screen (2 player game?)
      BEQ      GoP1Hit          ; No ... skip it
      LDA      #2               ; Player 1 is onscreen and didn't collide ...
@@ -460,9 +460,9 @@ GoCheckP1:
 
 GoP1Hit:
      LDA      #0               ; Going to ...
-     STA      <MODE             ; ... game-over mode
-     STA      <AUDV0            ; Turn off any ...
-     STA      <AUDV1            ; ... sound
+     STA      MODE             ; ... game-over mode
+     STA      AUDV0            ; Turn off any ...
+     STA      AUDV1            ; ... sound
      JSR      INIT_GO_FX       ; Initialize sound effects
      RTS                       ; Done
 
@@ -484,23 +484,23 @@ MOVE_WALLS:
      ;  This function moves the wall down the screen and back to position 0
      ;  when it reaches (or passes) 112.
 
-     DEC      <WALLDELY         ; Wall motion timer
-     LDA      <WALLDELY         ; Time to ...
+     DEC      WALLDELY         ; Wall motion timer
+     LDA      WALLDELY         ; Time to ...
      CMP      #0               ; ... move the wall?
      BNE      WallDone         ; No ... leave it alone
-     LDA      <WALLDELYR        ; Reset the ...
-     STA      <WALLDELY         ; ... delay count
-     LDA      <WALLSTART        ; Current wall position
+     LDA      WALLDELYR        ; Reset the ...
+     STA      WALLDELY         ; ... delay count
+     LDA      WALLSTART        ; Current wall position
      CLC                       ; Increment ...
-     ADC      <WALL_INC         ; ... wall position
+     ADC      WALL_INC         ; ... wall position
      CMP      #112             ; At the bottom?
      BCC      WallOK           ; No ... leave it alone
      LDA      #0               ; Else restart ...
-     STA      <WALLSTART        ; ... wall at top of screen
+     STA      WALLSTART        ; ... wall at top of screen
      LDA      #1               ; Return flag that wall DID restart
      RTS                       ; Done
 WallOK:
-     STA      <WALLSTART        ; Store new wall position
+     STA      WALLSTART        ; Store new wall position
 WallDone:
      LDA      #0               ; Return flag that wall did NOT restart
      RTS                       ; Done
@@ -513,15 +513,15 @@ NEW_GAPS:
      ;  area.
 
      LDA      #255             ; Start with ...
-     STA      <WALLDRELA        ; ... solid wall in PF0 ...
-     STA      <WALLDRELB        ; ... and PF1
-     LDA      <GAPBITS          ; Store the gap pattern ...
-     STA      <WALLDRELC        ; ... in PF2
+     STA      WALLDRELA        ; ... solid wall in PF0 ...
+     STA      WALLDRELB        ; ... and PF1
+     LDA      GAPBITS          ; Store the gap pattern ...
+     STA      WALLDRELC        ; ... in PF2
 
-     LDA      <ENTROPYA         ; Get ...
-     ADC      <ENTROPYB         ; ... a randomish ...
-     ADC      <ENTROPYC         ; ... number ...
-     STA      <ENTROPYC         ; Update the random seed
+     LDA      ENTROPYA         ; Get ...
+     ADC      ENTROPYB         ; ... a randomish ...
+     ADC      ENTROPYC         ; ... number ...
+     STA      ENTROPYC         ; Update the random seed
      AND      #15              ; 0 to 15
      CMP      #12              ; Too far to the right?
      BEQ      GapOK            ; No ... 12 is OK
@@ -532,9 +532,9 @@ GapOK:
      CMP      #0               ; Gap already at far left?
      BEQ      GapDone          ; Yes ... done
      SEC                       ; Roll gap ...
-     ROR      <WALLDRELC        ; ... left ...
-     ROL      <WALLDRELB        ; ... desired ...
-     ROR      <WALLDRELA        ; ... times ...
+     ROR      WALLDRELC        ; ... left ...
+     ROL      WALLDRELB        ; ... desired ...
+     ROR      WALLDRELA        ; ... times ...
      SEC                       ; All rolls ...
      SBC      #1               ; ... done?
      JMP      GapOK            ; No ... do them all
@@ -578,53 +578,53 @@ CountDone:
 
      LDA      DIGITS,Y         ; Get the 10's digit
      AND      #0xF0            ; Upper nibble
-     STA      <SCORE_PF1        ; Store left side
+     STA      SCORE_PF1        ; Store left side
      LDA      DIGITS,X         ; Get the 1's digit
      AND      #0x0F            ; Lower nibble
-     ORA      <SCORE_PF1        ; Put left and right half together
-     STA      <SCORE_PF1        ; And store image
+     ORA      SCORE_PF1        ; Put left and right half together
+     STA      SCORE_PF1        ; And store image
 
      ; We have plenty of code space. Time and registers are at a premium.
      ; So copy/past the code for each row
 
      LDA      DIGITS+1,Y       ; Repeat for 2nd line of picture ...
      AND      #0xF0            ; ...
-     STA      <SCORE_PF1+1      ; ...
+     STA      SCORE_PF1+1      ; ...
      LDA      DIGITS+1,X       ; ...
      AND      #15              ; ...
-     ORA      <SCORE_PF1+1      ; ...
-     STA      <SCORE_PF1+1      ; ...
+     ORA      SCORE_PF1+1      ; ...
+     STA      SCORE_PF1+1      ; ...
 
      LDA      DIGITS+2,Y       ; Repeat for 3nd line of picture
      AND      #0xF0            ; ...
      STA      SCORE_PF1+2      ; ...
      LDA      DIGITS+2,X       ; ...
      AND      #0x0F            ; ...
-     ORA      <SCORE_PF1+2      ; ...
-     STA      <SCORE_PF1+2      ; ...
+     ORA      SCORE_PF1+2      ; ...
+     STA      SCORE_PF1+2      ; ...
 
      LDA      DIGITS+3,Y       ; Repeat for 4th line of picture
      AND      #0xF0            ; ...
-     STA      <SCORE_PF1+3      ; ...
+     STA      SCORE_PF1+3      ; ...
      LDA      DIGITS+3,X       ; ...
      AND      #0x0F            ; ...
-     ORA      <SCORE_PF1+3      ; ...
-     STA      <SCORE_PF1+3      ; ...
+     ORA      SCORE_PF1+3      ; ...
+     STA      SCORE_PF1+3      ; ...
 
      LDA      DIGITS+4,Y       ; Repeat for 5th line of picture
      AND      #0xF0            ; ...
-     STA      <SCORE_PF1+4      ; ...
+     STA      SCORE_PF1+4      ; ...
      LDA      DIGITS+4,X       ; ...
      AND      #0x0F            ; ...
-     ORA      <SCORE_PF1+4      ; ...
-     STA      <SCORE_PF1+4      ; ...
+     ORA      SCORE_PF1+4      ; ...
+     STA      SCORE_PF1+4      ; ...
 
      LDA      #0               ; For now ...
-     STA      <SCORE_PF2        ; ... there ...
-     STA      <SCORE_PF2+1      ; ... is ...
-     STA      <SCORE_PF2+2      ; ... no ...
-     STA      <SCORE_PF2+3      ; ... 100s ...
-     STA      <SCORE_PF2+4      ; ... digit drawn
+     STA      SCORE_PF2        ; ... there ...
+     STA      SCORE_PF2+1      ; ... is ...
+     STA      SCORE_PF2+2      ; ... no ...
+     STA      SCORE_PF2+3      ; ... 100s ...
+     STA      SCORE_PF2+4      ; ... digit drawn
 
      RTS                       ; Done
 
@@ -644,9 +644,9 @@ ExpP0Ama:
      LDA      #12              ; near the bottom
 
 ExpP1:
-     STA      <PLAYR0Y          ; Player 0 Y coordinate
+     STA      PLAYR0Y          ; Player 0 Y coordinate
                                            
-     LDX      <PLAYR1Y          ; Is P1 on ...
+     LDX      PLAYR1Y          ; Is P1 on ...
      CPX      #255             ; ... the screen?
      BEQ      ExpNoP1          ; No ... skip all this
      LDA      SWCHB            ; Check P1 ...
@@ -676,27 +676,27 @@ AdjNextRow:
      BNE      AdjCheckTable    ; No ... check this row
      RTS                       ; End of the table ... leave it alone
 AdjCheckTable:
-     CMP      <WALLCNT          ; Is this our row?
+     CMP      WALLCNT          ; Is this our row?
      BNE      AdjBump          ; No ... bump to next
      INX                       ; Copy ...
      LDA      SKILL_VALUES,X   ; ... new ...
      STA      WALL_INC         ; ... wall increment
      INX                       ; Copy ...
      LDA      SKILL_VALUES,X   ; ... new ...
-     STA      <WALLDELY         ; ... wall ...
-     STA      <WALLDELYR        ; ... delay
+     STA      WALLDELY         ; ... wall ...
+     STA      WALLDELYR        ; ... delay
      INX                       ; Copy ...
      LDA      SKILL_VALUES,X   ; ... new ...
-     STA      <GAPBITS          ; ... gap pattern
+     STA      GAPBITS          ; ... gap pattern
      INX                       ; Copy ...
      LDA      SKILL_VALUES,X   ; ... new ...
-     STA      <MUSAIND          ; ... MusicA index
+     STA      MUSAIND          ; ... MusicA index
      INX                       ; Copy ...
      LDA      SKILL_VALUES,X   ; ... new ...
-     STA      <MUSBIND          ; ... MusicB index
+     STA      MUSBIND          ; ... MusicB index
      LDA      #1               ; Force ...
-     STA      <MUSADEL          ; ... music to ...
-     STA      <MUSBDEL          ; ... start new
+     STA      MUSADEL          ; ... music to ...
+     STA      MUSBDEL          ; ... start new
      RTS                       ; Done
 AdjBump:
      INX                       ; Move ...
@@ -714,12 +714,12 @@ SEL_RESET_CHK:
      ;  switches and debounces the transitions.
      ;  xxxxxxSR (Select, Reset)
                                            
-     LDX      <DEBOUNCE         ; Get the last value
+     LDX      DEBOUNCE         ; Get the last value
      LDA      SWCHB            ; New value
      AND      #3               ; Only need bottom 2 bits
-     CMP      <DEBOUNCE         ; Same as before?
+     CMP      DEBOUNCE         ; Same as before?
      BEQ      SelDebounce      ; Yes ... return nothing changed
-     STA      <DEBOUNCE         ; Hold new last value
+     STA      DEBOUNCE         ; Hold new last value
      EOR      #255             ; Active low to active high
      AND      #3               ; Only need select/reset
      RTS                       ; Return changes
@@ -734,19 +734,19 @@ INIT_MUSIC:
      ;  for 2-channel music
 
      LDA      #6               ; Audio control ...
-     STA      <AUDC0            ; ... to pure ...
-     STA      <AUDC1            ; ... tones
+     STA      AUDC0            ; ... to pure ...
+     STA      AUDC1            ; ... tones
      LDA      #0               ; Turn off ...
-     STA      <AUDV0            ; ... all ...
-     STA      <AUDV1            ; ... sound
-     STA      <MUSAIND          ; Music pointers ...
-     STA      <MUSBIND          ; ... to top of data
+     STA      AUDV0            ; ... all ...
+     STA      AUDV1            ; ... sound
+     STA      MUSAIND          ; Music pointers ...
+     STA      MUSBIND          ; ... to top of data
      LDA      #1               ; Force ...
-     STA      <MUSADEL          ; ... music ...
-     STA      <MUSBDEL          ; ... reload
+     STA      MUSADEL          ; ... music ...
+     STA      MUSBDEL          ; ... reload
      LDA      #15              ; Set volume levels ...
-     STA      <MUSAVOL          ; ... to ...
-     STA      <MUSBVOL          ; ... maximum
+     STA      MUSAVOL          ; ... to ...
+     STA      MUSBVOL          ; ... maximum
      RTS                       ; Done
 
 PROCESS_MUSIC:
@@ -756,11 +756,11 @@ PROCESS_MUSIC:
      ;  for individual channels. This function changes the
      ;  notes at the right time.
 
-     DEC      <MUSADEL          ; Current note on Channel A ended?
+     DEC      MUSADEL          ; Current note on Channel A ended?
      BNE      MusDoB           ; No ... let it play
                                            
 MusChanA:
-     LDX      <MUSAIND          ; Voice-A index
+     LDX      MUSAIND          ; Voice-A index
      LDA      MUSICA,X         ; Get the next music command
      CMP      #0               ; Jump?
      BEQ      MusCmdJumpA      ; Yes ... handle it
@@ -769,18 +769,18 @@ MusChanA:
      CMP      #2               ; Volume?
      BNE      MusCmdToneA      ; No ... must be a note
      INX                       ; Point to volume value
-     INC      <MUSAIND          ; Bump the music pointer
+     INC      MUSAIND          ; Bump the music pointer
      LDA      MUSICA,X         ; Get the volume value
-     INC      <MUSAIND          ; Bump the music pointer
-     STA      <MUSAVOL          ; Store the new volume value
+     INC      MUSAIND          ; Bump the music pointer
+     STA      MUSAVOL          ; Store the new volume value
      JMP      MusChanA         ; Keep processing through a tone
 
 MusCmdCtrlA:
      INX                       ; Point to the control value
-     INC      <MUSAIND          ; Bump the music pointer
+     INC      MUSAIND          ; Bump the music pointer
      LDA      MUSICA,X         ; Get the control value
-     INC      <MUSAIND          ; Bump the music pointer
-     STA      <AUDC0            ; Store the new control value
+     INC      MUSAIND          ; Bump the music pointer
+     STA      AUDC0            ; Store the new control value
      JMP      MusChanA         ; Keep processing through a tone
 
 MusCmdJumpA:
@@ -791,20 +791,20 @@ MusCmdJumpA:
      TXA                       ; Into A so we can subtract
      SEC                       ; New ...
      SBC      MUSICA,Y         ; ... index
-     STA      <MUSAIND          ; Store it
+     STA      MUSAIND          ; Store it
      JMP      MusChanA         ; Keep processing through a tone
 
 MusCmdToneA:
-     LDY      <MUSAVOL          ; Get the volume
+     LDY      MUSAVOL          ; Get the volume
      AND      #0x1F            ; Lower 5 bits are frequency
      CMP      #0x1F            ; Is this a silence?
      BNE      MusNoteA         ; No ... play it
      LDY      #0               ; Frequency of 31 flags silence
 MusNoteA:
-     STA      <AUDF0            ; Store the frequency
-     STY      <AUDV0            ; Store the volume
+     STA      AUDF0            ; Store the frequency
+     STY      AUDV0            ; Store the volume
      LDA      MUSICA,X         ; Get the note value again
-     INC      <MUSAIND          ; Bump to the next command
+     INC      MUSAIND          ; Bump to the next command
      ROR      A                ; The upper ...
      ROR      A                ; ... three ...
      ROR      A                ; ... bits ...
@@ -814,15 +814,15 @@ MusNoteA:
      CLC                       ; No accidental carry
      ROL      A                ; Every delay tick ...
      ROL      A                ; ... is *4 frames
-     STA      <MUSADEL          ; Store the note delay
+     STA      MUSADEL          ; Store the note delay
 
 MusDoB:
                                            
-     DEC      <MUSBDEL
+     DEC      MUSBDEL
      BNE      MusDoDone
                                            
 MusChanB:
-     LDX      <MUSBIND
+     LDX      MUSBIND
      LDA      MUSICB,X
      CMP      #0
      BEQ      MusCmdJumpB
@@ -831,18 +831,18 @@ MusChanB:
      CMP      #2
      BNE      MusCmdToneB
      INX
-     INC      <MUSBIND
+     INC      MUSBIND
      LDA      MUSICB,X
-     INC      <MUSBIND
-     STA      <MUSBVOL
+     INC      MUSBIND
+     STA      MUSBVOL
      JMP      MusChanB
 
 MusCmdCtrlB:
      INX
-     INC      <MUSBIND
+     INC      MUSBIND
      LDA      MUSICB,X
-     INC      <MUSBIND
-     STA      <AUDC1
+     INC      MUSBIND
+     STA      AUDC1
      JMP      MusChanB
 
 MusCmdJumpB:
@@ -853,20 +853,20 @@ MusCmdJumpB:
      TXA
      SEC
      SBC      MUSICB,Y
-     STA      <MUSBIND
+     STA      MUSBIND
      JMP      MusChanB
 
 MusCmdToneB:
-     LDY      <MUSBVOL
+     LDY      MUSBVOL
      AND      #0x1F
      CMP      #0x1F
      BNE      MusNoteB
      LDY      #0
 MusNoteB:
-     STA      <AUDF1
-     STY      <AUDV1
+     STA      AUDF1
+     STY      AUDV1
      LDA      MUSICB,X
-     INC      <MUSBIND
+     INC      MUSBIND
      ROR      A
      ROR      A
      ROR      A
@@ -876,7 +876,7 @@ MusNoteB:
      CLC
      ROL      A
      ROL      A
-     STA      <MUSBDEL
+     STA      MUSBDEL
 
 MusDoDone:
      RTS                       ; Done
@@ -888,16 +888,16 @@ INIT_GO_FX:
      ;  to play the soundeffect of a player hitting the wall
                                            
      LDA      #5               ; Set counter for frame delay ...
-     STA      <MUS_TMP1         ; ... between frequency change
+     STA      MUS_TMP1         ; ... between frequency change
      LDA      #3               ; Tone type ...
-     STA      <AUDC0            ; ... poly tone
+     STA      AUDC0            ; ... poly tone
      LDA      #15              ; Volume A ...
-     STA      <AUDV0            ; ... to max
+     STA      AUDV0            ; ... to max
      LDA      #0               ; Volume B ...
-     STA      <AUDV1            ; ... silence
+     STA      AUDV1            ; ... silence
      LDA      #240             ; Initial ...
-     STA      <MUS_TMP0         ; ... sound ...
-     STA      <AUDF0            ; ... frequency
+     STA      MUS_TMP0         ; ... sound ...
+     STA      AUDF0            ; ... frequency
      RTS                       ; Done
 
 PROCESS_GO_FX:
@@ -905,13 +905,13 @@ PROCESS_GO_FX:
      ;  This function is called once per scanline to play the
      ;  soundeffects of a player hitting the wall.
 
-     DEC      <MUS_TMP1         ; Time to change the frequency?
+     DEC      MUS_TMP1         ; Time to change the frequency?
      BNE      FxRun            ; No ... let it run
      LDA      #5               ; Reload ...
-     STA      <MUS_TMP1         ; ... the frame count
-     INC      <MUS_TMP0         ; Increment ...
-     LDA      <MUS_TMP0         ; ... the frequency divisor
-     STA      <AUDF0            ; Change the frequency
+     STA      MUS_TMP1         ; ... the frame count
+     INC      MUS_TMP0         ; Increment ...
+     LDA      MUS_TMP0         ; ... the frequency divisor
+     STA      AUDF0            ; Change the frequency
      CMP      #0
      BNE      FxRun
      LDA      #1               ; All done ... return 1
