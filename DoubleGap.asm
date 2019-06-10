@@ -49,20 +49,22 @@ VIDEO_KERNEL:
 
 ; TODO assembler needs to check for sizes when there are multiple options. Like STA xx and STA xxxx.
 ; TODO allow for "<" and ">" overrides.
+; TODO words
+; TODO auto pick "<" and ">"
 
     LDA      #2               ; D1 bit ON
-    STA      <WSYNC            ; Wait for the end of the current line
-    STA      <VBLANK           ; Turn the electron beam off
-    STA      WSYNC            ; Wait for all ...
-    STA      WSYNC            ; ... the electrons ...
-    STA      WSYNC            ; ... to drain out.
-    STA      VSYNC            ; Trigger the vertical sync signal
-    STA      WSYNC            ; Hold the vsync signal for ...
-    STA      WSYNC            ; ... three ...
-    STA      WSYNC            ; ... scanlines
-    STA      HMOVE            ; Tell hardware to move all game objects
+    STA      <WSYNC           ; Wait for the end of the current line
+    STA      <VBLANK          ; Turn the electron beam off
+    STA      <WSYNC           ; Wait for all ...
+    STA      <WSYNC           ; ... the electrons ...
+    STA      <WSYNC           ; ... to drain out.
+    STA      <VSYNC           ; Trigger the vertical sync signal
+    STA      <WSYNC           ; Hold the vsync signal for ...
+    STA      <WSYNC           ; ... three ...
+    STA      <WSYNC           ; ... scanlines
+    STA      <HMOVE           ; Tell hardware to move all game objects
     LDA      #0               ; D1 bit OFF
-    STA      VSYNC            ; Release the vertical sync signal
+    STA      <VSYNC           ; Release the vertical sync signal
     LDA      #43              ; Set timer to 43*64 = 2752 machine ...
     STA      TIM64T           ; ... cycles 2752/(228/3) = 36 scanlines
 
