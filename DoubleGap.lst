@@ -359,11 +359,6 @@ F008: 20 DB F1         JSR      INIT_SELMODE     ; Start out in SELECT-MODE
                   
                   VIDEO_KERNEL:
                   
-                  ; TODO assembler needs to check for sizes when there are multiple options. Like STA xx and STA xxxx.
-                  ; TODO allow for "" and ">" overrides.
-                  ; TODO words
-                  ; TODO auto pick "" and ">"
-                  
 F00B: A9 02            LDA      #2               ; D1 bit ON
 F00D: 85 02            STA      WSYNC           ; Wait for the end of the current line
 F00F: 85 01            STA      VBLANK          ; Turn the electron beam off
@@ -1509,7 +1504,7 @@ F593: 00               .   0b__........
                   
                   0xF7FA:
                   ; 6502 vectors
-F7FA: 00 F0            . 00,0xF0
-F7FC: 00 F0            . 00,0xF0  ; Reset vector (top of program)
-F7FE: 00 F0            . 00,0xF0
+F7FA: 00 F0            . word 0xF000
+F7FC: 00 F0            . word 0xF000  ; Reset vector (top of program)
+F7FE: 00 F0            . word 0xF000
                   

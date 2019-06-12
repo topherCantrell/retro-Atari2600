@@ -47,11 +47,6 @@ main:
 
 VIDEO_KERNEL:
 
-; TODO assembler needs to check for sizes when there are multiple options. Like STA xx and STA xxxx.
-; TODO allow for "" and ">" overrides.
-; TODO words
-; TODO auto pick "" and ">"
-
     LDA      #2               ; D1 bit ON
     STA      WSYNC           ; Wait for the end of the current line
     STA      VBLANK          ; Turn the electron beam off
@@ -1197,7 +1192,7 @@ DIGITS:
 
 0xF7FA:
 	 ; 6502 vectors
-     . 00,0xF0
-     . 00,0xF0  ; Reset vector (top of program)
-     . 00,0xF0
+     . word 0xF000
+     . word 0xF000  ; Reset vector (top of program)
+     . word 0xF000
 
