@@ -90,7 +90,7 @@ DoGameOverMode:
     ;  ***** LENGTHY GAME LOGIC PROCESSING ENDS HERE *****
 
 DrawFrame:
-    LDA      >INTIM            ; Wait for ...
+    LDA      INTIM            ; Wait for ...
     CMP      #0               ; ... the visible area ...
     BNE      DrawFrame        ; ... of the screen
 
@@ -138,7 +138,7 @@ DrawVisibleRows:
     STA      PF2              ; Play field 2 off
     STA      WSYNC            ; Next scanline
 
-    JMP      VIDEO_KERNEL
+    JMP      VIDEO_KERNEL     ; Back to the top of the loop
 
 BUILDROW:
 
