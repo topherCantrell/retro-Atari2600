@@ -70,4 +70,4 @@ https://www.youtube.com/watch?v=xcmxLo47WdA
 
 Play it online:
 
-https://javatari.org/?ROM=https://github.com/topherCantrell/retro-Atari2600/blob/master/content/DoubleGap.bin?raw=true
+https://javatari.org/?ROM=https://github.com/topherCantrell/retro-Atari2600/blob/master/DoubleGap.bin?raw=true
